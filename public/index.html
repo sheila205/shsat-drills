@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Products to Know Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: one centered column on graph paper; a single drill card is the focus, stats in a typewriter strip above it */
+:root{
+  --paper:#F3F6F6; --sheet:#FFFFFF; --ink:#18263A; --muted:#5B6878; --line:#D5DDE3;
+  --grid:rgba(33,72,192,.07); --pen:#2148C0; --pen-soft:#E3E9FB;
+  --ok:#1D7448; --ok-soft:#E1F2E8; --miss:#B0362C; --miss-soft:#F8E4E1;
+  --f-type:"Courier Prime","Courier New",ui-monospace,monospace;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#10161F; --sheet:#18212D; --ink:#E3E8EF; --muted:#9AA6B6; --line:#2C3847;
+  --grid:rgba(127,162,255,.06); --pen:#86A6FF; --pen-soft:#22305A;
+  --ok:#5BC98E; --ok-soft:#173726; --miss:#F08A7E; --miss-soft:#3F1E1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#10161F; --sheet:#18212D; --ink:#E3E8EF; --muted:#9AA6B6; --line:#2C3847;
+  --grid:rgba(127,162,255,.06); --pen:#86A6FF; --pen-soft:#22305A;
+  --ok:#5BC98E; --ok-soft:#173726; --miss:#F08A7E; --miss-soft:#3F1E1B; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;}
+.wrap{max-width:640px;margin:0 auto;padding-block:28px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:20px}
+h1,h2{font-family:var(--f-type);font-weight:700;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:1.75rem}
+h1 .x{color:var(--pen);font-weight:400}
+h2{font-size:1.05rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+p{margin:0}
+.sub{color:var(--muted);max-width:60ch}
+.panel{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;min-width:0}
+.chk:has(input:checked){border-color:var(--pen);background:var(--pen-soft)}
+.chk input{accent-color:var(--pen);margin-top:4px;flex:none}
+.chk small{display:block;color:var(--muted);font-size:.8rem;line-height:1.3}
+.goals{display:flex;flex-wrap:wrap;gap:8px}
+.goals label{position:relative}
+.goals input{position:absolute;opacity:0}
+.goals span{display:inline-block;padding:7px 12px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:.9rem}
+.goals input:checked+span{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.goals input:focus-visible+span{outline:2px solid var(--pen);outline-offset:2px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--sheet);color:var(--ink);padding:10px 16px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--pen);outline-offset:2px}
+button.primary{background:var(--pen);border-color:var(--pen);color:var(--sheet);font-weight:700}
+button.ghost{background:transparent}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.err{color:var(--miss);font-size:.9rem}
+
+/* drill */
+.strip{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--f-type);font-variant-numeric:tabular-nums;
+  border-bottom:1px dashed var(--line);padding-bottom:10px}
+.strip b{font-size:1.25rem}
+.strip .lbl{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.idle{color:var(--miss)}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:28px 20px;display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;
+  box-shadow:0 1px 0 var(--line),0 10px 30px -18px rgba(24,38,58,.35)}
+.tag{font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--pen)}
+.prompt{font-family:var(--f-type);font-weight:700;font-size:clamp(1.7rem,7vw,2.75rem);line-height:1.15;text-wrap:balance;overflow-wrap:anywhere}
+.prompt.long{font-size:clamp(1.25rem,5vw,1.7rem)}
+form.ans{display:flex;gap:8px;width:100%;max-width:360px}
+#answer{flex:1;min-width:0;font-family:var(--f-type);font-size:1.6rem;text-align:center;padding:10px;border:2px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+#answer:focus{border-color:var(--pen);outline:none}
+.fb{min-height:3.2em;width:100%;max-width:360px;border-radius:8px;padding:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.fb.ok{background:var(--ok-soft);color:var(--ok)}
+.fb.miss{background:var(--miss-soft);color:var(--miss)}
+.fb .hint{font-weight:400;font-size:.85rem;color:var(--ink)}
+.keys{font-size:.8rem;color:var(--muted)}
+
+/* summary */
+.headline{font-family:var(--f-type);font-size:1.4rem;line-height:1.35;text-wrap:balance}
+.headline em{font-style:normal;color:var(--pen);font-weight:700}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.92rem}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+td.n,th.n{text-align:right}
+.missed{display:flex;flex-direction:column;gap:6px;font-family:var(--f-type)}
+.missed div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dotted var(--line);padding-bottom:4px;flex-wrap:wrap}
+.missed s{color:var(--miss)}
+.empty{color:var(--muted);font-size:.92rem}
+.field{display:flex;flex-direction:column;gap:6px;max-width:320px}
+.field label{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.field input{font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.sync{font-size:.85rem;color:var(--muted);display:flex;gap:8px;align-items:center}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.sync.on i{background:var(--ok)}
+.sync.warn{color:var(--miss)} .sync.warn i{background:var(--miss)}
+.students{display:flex;flex-direction:column;gap:10px}
+.stu{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.stu-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.stu-top b{font-size:1.05rem}
+.stu-stats{display:flex;gap:16px;flex-wrap:wrap;font-variant-numeric:tabular-nums;font-size:.9rem}
+.stu-stats span{color:var(--muted)} .stu-stats strong{color:var(--ink)}
+details summary{cursor:pointer;color:var(--pen);font-size:.9rem}
+.pill{font-size:.72rem;padding:1px 7px;border-radius:999px;background:var(--pen-soft);color:var(--pen)}
+@media (prefers-reduced-motion:no-preference){.fb{transition:background .15s}}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:6px">
+    <h1><span class="x">✕</span> Products to Know <span class="x">✕</span></h1>
+    <p class="sub">Drills from Greg's sheets, served in random order.</p>
+  </header>
+
+  <!-- SETUP -->
+  <section id="setup" style="display:flex;flex-direction:column;gap:20px">
+    <form class="panel" id="codePanel" hidden>
+      <h2>Access code</h2>
+      <p class="sub">Enter the code you were given. This device will remember it.</p>
+      <div class="row"><div class="field" style="flex:1"><label for="codeInput">Code</label><input id="codeInput" autocomplete="off" autocapitalize="off"></div></div>
+      <p class="err" id="codeErr" hidden>That code didn't work. Check it and try again.</p>
+      <div class="row"><button class="primary" type="submit" id="codeBtn">Unlock</button></div>
+    </form>
+    <div class="panel">
+      <p class="sync" id="syncNote"><i></i><span>Connecting…</span></p>
+      <h2 style="margin-top:6px">What to practice</h2>
+      <div class="cats" id="cats"></div>
+      <h2 style="margin-top:6px">Session length</h2>
+      <div class="goals" id="goals"></div>
+      <p class="err" id="setupErr" hidden>Pick at least one topic to start.</p>
+      <div class="row"><button class="primary" id="startBtn">Start session</button></div>
+    </div>
+    <div class="panel">
+      <h2>Practice log</h2>
+      <p class="empty" id="histTotals"></p>
+      <p class="empty" id="histMissed"></p>
+      <div class="tbl-wrap" id="histWrap"></div>
+    </div>
+  </section>
+
+  <!-- DRILL -->
+  <section id="drill" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="strip">
+      <div><span class="lbl">Active time</span><b id="sTime">0:00</b> <span id="sIdle" class="idle" hidden>· paused</span></div>
+      <div><span class="lbl">Answered</span><b id="sCount">0</b><span id="sGoal"></span></div>
+      <div><span class="lbl">Correct</span><b id="sRight">0</b></div>
+    </div>
+    <div class="card">
+      <div class="tag" id="qTag"></div>
+      <div class="prompt" id="qText"></div>
+      <form class="ans" id="ansForm" autocomplete="off">
+        <input id="answer" aria-label="Your answer" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="primary" type="submit" id="goBtn">Check</button>
+      </form>
+      <div class="fb" id="fb" aria-live="polite"></div>
+      <p class="keys">Enter to check · Enter again for the next one. Misses come back a few questions later.</p>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <button class="ghost" id="pauseBtn">Pause</button>
+      <button id="endBtn">End session</button>
+    </div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section id="summary" hidden style="display:flex;flex-direction:column;gap:20px">
+    <div class="panel">
+      <h2>Session report</h2>
+      <p class="headline" id="sumHead"></p>
+      <div class="tbl-wrap" id="sumTable"></div>
+    </div>
+    <div class="panel">
+      <h2>Review these</h2>
+      <div class="missed" id="sumMissed"></div>
+    </div>
+    <div class="row"><button class="primary" id="againBtn">Practice again</button><button id="homeBtn">Change topics</button></div>
+  </section>
+</div>
+
+<script>
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+             set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- answer checkers ---------- */
+const num=s=>{s=String(s).replace(/,/g,'').replace(/\s/g,'');if(!/^-?\d*\.?\d+$/.test(s))return NaN;return parseFloat(s)};
+const numCheck=(ans,tol=1e-9)=>inp=>Math.abs(num(inp)-ans)<=tol;
+const clean=s=>String(s).toLowerCase().replace(/[\s.]/g,'');
+function twelveCheck(h,pm){ // expects e.g. "3pm"
+  return inp=>{const m=clean(inp).match(/^(\d{1,2})(?::?00)?(am|pm|a|p)$/);return !!m&&+m[1]===h&&(m[2][0]==='p')===pm};
+}
+function twentyFourCheck(h){return inp=>{const s=clean(inp).replace(':','');const m=s.match(/^(\d{1,2})(00)?$/);return !!m&&+m[1]===h}}
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
+const monthCheck=i=>inp=>{const s=clean(inp);return s.length>=3&&MONTHS[i].toLowerCase().startsWith(s)};
+
+/* ---------- question generators ---------- */
+const sup={2:'²',3:'³',4:'⁴'};
+const plural=(k,u)=>k===1?u[0]:u[1];
+const CONV={
+  time:[
+    [['minute','minutes'],['second','seconds'],60],[['hour','hours'],['minute','minutes'],60],
+    [['hour','hours'],['second','seconds'],3600,[1,2]],[['day','days'],['hour','hours'],24],
+    [['week','weeks'],['day','days'],7],[['year','years'],['day','days'],365,[1]],
+    [['year','years'],['week','weeks'],52,[1,2]],[['score','score'],['year','years'],20,[1,2,3,4]],
+    [['century','centuries'],['year','years'],100],[['millennium','millennia'],['year','years'],1000,[1,2,3]]],
+  length:[
+    [['foot','feet'],['inch','inches'],12],[['yard','yards'],['foot','feet'],3],[['yard','yards'],['inch','inches'],36],
+    [['mile','miles'],['foot','feet'],5280,[1,2]],[['meter','meters'],['centimeter','centimeters'],100],
+    [['meter','meters'],['millimeter','millimeters'],1000],[['centimeter','centimeters'],['millimeter','millimeters'],10],
+    [['kilometer','kilometers'],['meter','meters'],1000]],
+  weight:[
+    [['pound','pounds'],['ounce','ounces'],16],[['ton','tons'],['pound','pounds'],2000],
+    [['gram','grams'],['milligram','milligrams'],1000],[['kilogram','kilograms'],['gram','grams'],1000],
+    [['dozen','dozen'],['item','items'],12],[['gross','gross'],['item','items'],144]]
+};
+function convQ(list,tag){
+  const [big,small,f,ks]=pick(list);
+  const k=pick(ks||[1,1,1,2,3,4,5,10]);
+  if(Math.random()<.65||k===1&&Math.random()<.5){
+    const q=k===1?`How many ${small[1]} in 1 ${big[0]}?`:`${k} ${plural(k,big)} = how many ${small[1]}?`;
+    return {tag,q,shown:String(k*f),check:numCheck(k*f),key:q};
+  }
+  const q=`${(k*f).toLocaleString()} ${small[1]} = how many ${big[1]}?`;
+  return {tag,q,shown:String(k),check:numCheck(k),key:q};
+}
+CONV.capacity=[
+  [['cup','cups'],['fluid ounce','fluid ounces'],8],[['pint','pints'],['cup','cups'],2],[['quart','quarts'],['pint','pints'],2],
+  [['gallon','gallons'],['quart','quarts'],4],[['quart','quarts'],['cup','cups'],4,[1,2]],[['gallon','gallons'],['pint','pints'],8,[1,2]],
+  [['gallon','gallons'],['cup','cups'],16,[1,2]],[['liter','liters'],['milliliter','milliliters'],1000]];
+
+/* fractions: exact checks and repeating-decimal display */
+const OL='̅';
+function decRep(n,d){ // long division, overline the repeating part
+  const whole=Math.floor(n/d);let r=n%d,digits='';const seen={};
+  while(r!==0&&!(r in seen)){seen[r]=digits.length;r*=10;digits+=Math.floor(r/d);r%=d}
+  if(r===0)return {rep:false,disp:digits?`${whole}.${digits}`:String(whole)};
+  const i=seen[r];return {rep:true,disp:`${whole}.${digits.slice(0,i)}${[...digits.slice(i)].map(c=>c+OL).join('')}`};
+}
+const fracVal=s=>{s=String(s).replace(/\s/g,'');const m=s.match(/^(-?\d+)\/(\d+)$/);if(m)return +m[2]?m[1]/m[2]:NaN;return num(s)};
+const fracCheck=v=>inp=>Math.abs(fracVal(inp)-v)<1e-9&&/\//.test(inp);
+const ynCheck=yes=>inp=>{const s=clean(inp);return yes?/^(y|yes)$/.test(s):/^(n|no)$/.test(s)};
+const FRACS=[[1,2],[1,4],[3,4],[1,5],[2,5],[3,5],[4,5],[1,10],[3,10],[7,10],[9,10],[1,8],[3,8],[5,8],[7,8],[1,16],
+  [1,3],[2,3],[1,6],[5,6],[1,9],[2,9],[4,9],[5,9],[1,12],[1,11],[2,11],[5,11]];
+const SEVENTHS=[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]];
+function fracQ(list,tag){
+  const [n,d]=pick(list), v=n/d, dr=decRep(n,d), f=`${n}/${d}`;
+  const seventh=d===7, r=Math.random();
+  if(r<.4){
+    if(!dr.rep)return {tag,q:`${f} as a decimal?`,shown:dr.disp,check:numCheck(v,1e-9),key:'fd'+f};
+    const places=seventh?6:3;
+    return {tag,q:`${f} as a decimal (${places} places)?`,shown:`${dr.disp}  (≈ ${v.toFixed(places)})`,check:numCheck(v,seventh?1.5e-6:6e-4),key:'fd'+f};
+  }
+  if(r<.65&&!seventh){
+    const p=v*100, exact=Math.abs(p-Math.round(p*1000)/1000)<1e-9;
+    return {tag,q:exact?`${f} as a percent?`:`${f} as a percent (2 places)?`,shown:exact?`${+p.toFixed(3)}%`:`≈ ${p.toFixed(2)}%`,
+      check:inp=>numCheck(p,exact?1e-9:.006)(String(inp).replace('%','')),key:'fp'+f};
+  }
+  if(!dr.rep&&Math.random()<.4){
+    const p=+(v*100).toFixed(3);
+    return {tag,q:`${p}% as a fraction?`,shown:f,check:fracCheck(v),text:true,ph:'e.g. 3/8',key:'pf'+f};
+  }
+  return {tag,q:`${dr.disp} as a fraction?`,shown:f,check:fracCheck(v),text:true,ph:'e.g. 3/8',key:'df'+f};
+}
+
+const SUPD='⁰¹²³⁴⁵⁶⁷⁸⁹';const supN=n=>String(n).split('').map(c=>SUPD[c]).join('');
+const PREFIX=[['kilo',3],['hecto',2],['deca',1],['',0],['deci',-1],['centi',-2],['milli',-3]];
+const pow10=e=>e>=0?(10**e).toLocaleString():'0.'+'0'.repeat(-e-1)+'1';
+const TEEN=[[13,3],...[16,17,18,19].flatMap(a=>[2,3,4,5].map(b=>[a,b]))];
+const FAMILIES=[[105,3,35],[90,6,15],[45,3,15],[42,3,14],[96,4,24],...[2,3,4,5,6,10,12,15,20,30].map(k=>[60,k,60/k])];
+const NOT_PRIME={39:'13 × 3',51:'17 × 3',57:'19 × 3',85:'17 × 5',95:'19 × 5',91:'13 × 7',87:'29 × 3'};
+const PRIMES=[37,41,43,47,53,59,61,67,71,73,79,83,89,97];
+
+const TEMPS=[[0,32],[100,212],[10,50],[20,68],[25,77],[30,86],[37,98.6],[40,104],[5,41]];
+
+const CATS=[
+ {id:'mult',name:'Multiplication',desc:'Tables up to 20 × 20',gen(){
+   let a=R(2,20),b=R(2,20);
+   if(a<=10&&b<=10&&Math.random()<.7)a=R(11,20); // lean on the "teens"
+   return {tag:'Multiply',q:`${a} × ${b}`,shown:String(a*b),check:numCheck(a*b),key:`${Math.min(a,b)}x${Math.max(a,b)}`};}},
+ {id:'squares',name:'Squares & roots',desc:'1² to 20², 25², both directions',gen(){
+   const n=pick([...Array.from({length:19},(_,i)=>i+2),25,15,16]);
+   if(Math.random()<.5)return {tag:'Square',q:`${n}²`,shown:String(n*n),check:numCheck(n*n),key:'sq'+n};
+   return {tag:'Square root',q:`√${n*n}`,shown:String(n),check:numCheck(n),key:'rt'+n};}},
+ {id:'powers',name:'Cubes & 4th powers',desc:'2³–8³, 10³, 3⁴–5⁴, 7⁴, √2, √3',gen(){
+   const r=Math.random();
+   if(r<.12){const [n,v]=pick([[2,1.414],[3,1.732]]);return {tag:'Square root · 3 decimals',q:`√${n} ≈ ?`,shown:String(v),check:numCheck(v,.0015),key:'s'+n};}
+   const [b,e]=r<.62?[pick([2,3,4,5,6,7,8,10]),3]:[pick([3,4,5,7]),4];
+   const v=b**e;
+   if(Math.random()<.65)return {tag:e===3?'Cube':'Fourth power',q:`${b}${sup[e]}`,shown:String(v),check:numCheck(v),key:`p${b}^${e}`};
+   return {tag:e===3?'Cube root':'Fourth root',q:`${e===3?'∛':'∜'}${v.toLocaleString()}`,shown:String(b),check:numCheck(b),key:`r${b}^${e}`};}},
+ {id:'teens',name:'Teen facts & families',desc:'16–19 × 2–5, 105 ÷ 3, 90 ÷ 6, factors of 60, "is 51 prime?"',gen(){
+   const r=Math.random(), tag='Teen facts';
+   if(r<.55){const [a,b]=pick(TEEN),p=a*b,k=R(0,3);
+     if(k===0)return {tag,q:`${a} × ${b}`,shown:String(p),check:numCheck(p),key:`t${a}x${b}`};
+     if(k===1)return {tag,q:`${p} ÷ ${b}`,shown:String(a),check:numCheck(a),key:`t${p}/${b}`};
+     if(k===2)return {tag,q:`${p} ÷ ${a}`,shown:String(b),check:numCheck(b),key:`t${p}/${a}`};
+     return {tag,q:`${a} × ? = ${p}`,shown:String(b),check:numCheck(b),key:`t${a}?${p}`};}
+   if(r<.85){const [p,a,b]=pick(FAMILIES),k=R(0,2);
+     if(k===0)return {tag:'Fact family',q:`${p} ÷ ${a}`,shown:String(b),check:numCheck(b),key:`f${p}/${a}`};
+     if(k===1)return {tag:'Fact family',q:`${p} ÷ ${b}`,shown:String(a),check:numCheck(a),key:`f${p}/${b}`};
+     return {tag:'Fact family',q:`${b} × ${a}`,shown:String(p),check:numCheck(p),key:`f${b}x${a}`};}
+   const trap=Math.random()<.6, n=trap?+pick(Object.keys(NOT_PRIME)):pick(PRIMES);
+   return {tag:'Prime check',q:`Is ${n} prime?`,shown:trap?`no (${n} = ${NOT_PRIME[n]})`:'yes',check:ynCheck(!trap),text:true,ph:'yes or no',key:'pr'+n};}},
+ {id:'pow2',name:'Powers of 2 & factorials',desc:'2¹ to 2¹³, 1! to 6!, both directions',gen(){
+   if(Math.random()<.7){const n=R(1,13),v=2**n;
+     if(Math.random()<.55)return {tag:'Power of 2',q:`2${supN(n)}`,shown:v.toLocaleString(),check:numCheck(v),key:'2p'+n};
+     return {tag:'Power of 2',q:`2^? = ${v.toLocaleString()}`,shown:String(n),check:numCheck(n),key:'2r'+n};}
+   const n=R(1,6),v=[1,1,2,6,24,120,720][n];
+   if(Math.random()<.7||n<3)return {tag:'Factorial',q:`${n}!`,shown:String(v),check:numCheck(v),key:'fa'+n};
+   return {tag:'Factorial',q:`? ! = ${v}`,shown:String(n),check:numCheck(n),key:'fr'+n};}},
+ {id:'fracs',name:'Fractions, decimals, %',desc:'Halves to 16ths, thirds, 6ths, 9ths, 11ths, 12ths',gen(){return fracQ(FRACS,'Fractions');}},
+ {id:'sevenths',name:'Sevenths',desc:'1/7 to 6/7, the rotating 142857',gen(){return fracQ(SEVENTHS,'Sevenths');}},
+ {id:'time',name:'Time & calendar',desc:'Seconds to millennia, months, 24-hour clock',gen(){
+   const r=Math.random();
+   if(r<.45)return convQ(CONV.time,'Time');
+   if(r<.62){const i=R(0,11);
+     if(i===1)return {tag:'Calendar',q:'Days in February (not a leap year)?',shown:'28',check:numCheck(28),key:'feb'};
+     return {tag:'Calendar',q:`Days in ${MONTHS[i]}?`,shown:String(DAYS[i]),check:numCheck(DAYS[i]),key:'d'+i};}
+   if(r<.72){const i=R(0,11);return {tag:'Calendar',q:`What number month is ${MONTHS[i]}?`,shown:String(i+1),check:numCheck(i+1),key:'n'+i};}
+   if(r<.80){const i=R(0,11);return {tag:'Calendar',q:`Which month is month #${i+1}?`,shown:MONTHS[i],check:monthCheck(i),text:true,key:'m'+i};}
+   if(r<.82)return {tag:'Calendar',q:'Days in February in a leap year?',shown:'29',check:numCheck(29),key:'febl'};
+   const h=R(0,23);
+   const h12=h%12===0?12:h%12, pm=h>=12;
+   if(Math.random()<.5)return {tag:'24-hour clock',q:`${String(h).padStart(2,'0')}:00 on a 12-hour clock?`,shown:`${h12} ${pm?'pm':'am'}`,check:twelveCheck(h12,pm),text:true,key:'c'+h};
+   return {tag:'24-hour clock',q:`${h12} ${pm?'p.m.':'a.m.'} in 24-hour time?`,shown:`${String(h).padStart(2,'0')}:00`,check:twentyFourCheck(h),text:true,key:'t'+h};}},
+ {id:'length',name:'Length & distance',desc:'Inches, feet, yards, miles, metric',gen(){return convQ(CONV.length,'Length');}},
+ {id:'weight',name:'Weight & groups',desc:'Ounces, pounds, tons, grams, dozen, gross',gen(){return convQ(CONV.weight,'Weight & groups');}},
+ {id:'capacity',name:'Capacity & metric prefixes',desc:'Cups to gallons, liters, King Henry kilo → milli',gen(){
+   const r=Math.random();
+   if(r<.45)return convQ(CONV.capacity,'Capacity');
+   if(r<.6){const [p,e]=pick(PREFIX.filter(x=>x[0]));
+     return {tag:'Metric prefix',q:`What does "${p}" mean as a number?`,shown:pow10(e),check:numCheck(10**e,1e-12),key:'pm'+p};}
+   const u=pick(['liter','meter','gram']);
+   let a=pick(PREFIX),b=pick(PREFIX);while(a===b)b=pick(PREFIX);
+   if(Math.random()<.7&&a[1]<b[1])[a,b]=[b,a]; // mostly big → small (whole-number answers)
+   const diff=a[1]-b[1];
+   return {tag:'Metric prefix',q:`1 ${a[0]}${u} = how many ${b[0]}${u}s?`,shown:pow10(diff),check:numCheck(10**diff,Math.abs(10**diff)*1e-9),key:`mp${a[0]}${b[0]}${u}`};}},
+ {id:'temp',name:'Temperature',desc:'°C ↔ °F landmarks, Kelvin',gen(){
+   if(Math.random()<.15){const c=pick([0,100,25]);const k=+(c+273.15).toFixed(2);return {tag:'Temperature',q:`${c}°C in Kelvin?`,shown:String(k),check:numCheck(k,.01),key:'k'+c};}
+   const [c,f]=pick(TEMPS);
+   if(Math.random()<.5)return {tag:'Temperature',q:`${c}°C in °F?`,shown:String(f),check:numCheck(f,.05),key:'cf'+c};
+   return {tag:'Temperature',q:`${f}°F in °C?`,shown:String(c),check:numCheck(c,.05),key:'fc'+c};}},
+];
+const GOALS=[{id:'open',label:'Open-ended'},{id:'q20',label:'20 questions',q:20},{id:'q50',label:'50 questions',q:50},
+             {id:'m10',label:'10 min',m:10},{id:'m30',label:'30 min',m:30}];
+
+/* ---------- setup UI ---------- */
+const $=id=>document.getElementById(id);
+const NEW_V2=['teens','pow2','fracs','sevenths','capacity'];
+const prefs=store.get('ptk-prefs',{cats:['mult','squares','powers','teens','pow2','fracs','time','length','weight','capacity'],goal:'open',v:2});
+if(!prefs.v){prefs.cats.push(...NEW_V2);prefs.v=2}
+$('cats').innerHTML=CATS.map(c=>`<label class="chk"><input type="checkbox" id="cat-${c.id}" value="${c.id}" ${prefs.cats.includes(c.id)?'checked':''}><span>${c.name}<small>${c.desc}</small></span></label>`).join('');
+$('goals').innerHTML=GOALS.map(g=>`<label><input type="radio" name="goal" id="goal-${g.id}" value="${g.id}" ${prefs.goal===g.id?'checked':''}><span>${g.label}</span></label>`).join('');
+
+const fmt=ms=>{const s=Math.round(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;
+  return h?`${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`:`${m}:${String(x).padStart(2,'0')}`};
+const words=ms=>{const m=Math.floor(ms/60000),s=Math.round(ms%60000/1000);return m?`${m} min${s?` ${s} sec`:''}`:`${s} sec`};
+
+const escapeHtml=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const when=t=>`${new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric'})} ${new Date(t).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}`;
+function sessionRows(list){
+  return `<table><thead><tr><th>Date</th><th class="n">Questions</th><th class="n">Correct</th><th class="n">Active time</th><th class="n">Sec / q</th></tr></thead><tbody>${
+    list.map(s=>`<tr><td>${when(s.t)}${s.done===false?' <span class="pill">in progress</span>':''}</td><td class="n">${s.n}</td><td class="n">${s.n?Math.round(s.c/s.n*100):0}%</td><td class="n">${fmt(s.ms)}</td><td class="n">${s.n?(s.ms/1000/s.n).toFixed(1):'–'}</td></tr>`).join('')}</tbody></table>`;
+}
+const weekTotals=list=>{const wk=list.filter(s=>s.t>Date.now()-7*864e5);
+  return {k:wk.length,n:wk.reduce((a,s)=>a+s.n,0),c:wk.reduce((a,s)=>a+s.c,0),ms:wk.reduce((a,s)=>a+s.ms,0)}};
+const sortedSessions=d=>Object.values((d&&d.sessions)||{}).filter(x=>x&&x.n>0).sort((a,b)=>b.t-a.t);
+
+function renderHistory(){
+  const h=myData?sortedSessions(myData):store.get('ptk-history',[]).filter(x=>x.n>0).slice().reverse();
+  if(!h.length){$('histTotals').textContent='No sessions yet. Each session shows up here, on every device.';$('histWrap').innerHTML='';$('histMissed').textContent='';return}
+  const w=weekTotals(h);
+  $('histTotals').textContent=`Last 7 days: ${w.k} session${w.k===1?'':'s'}, ${w.n} questions, ${words(w.ms)} active.`;
+  $('histWrap').innerHTML=sessionRows(h.slice(0,25));
+  const miss={};h.slice(0,10).forEach(x=>(x.missed||[]).forEach(m=>miss[m]=(miss[m]||0)+1));
+  const top=Object.entries(miss).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  $('histMissed').textContent=top.length?'Most missed lately: '+top.map(([q,k])=>q+(k>1?` (×${k})`:'')).join(' · '):'';
+}
+
+/* ---------- practice log (server) ---------- */
+let myData=null, writing=false, pending=null;
+renderHistory();
+function setSync(kind,msg){const el=$('syncNote');el.className='sync'+(kind?' '+kind:'');el.lastElementChild.textContent=msg}
+const unsynced=()=>store.get('ptk-unsynced',{});
+async function api(method,url,body){
+  const r=await fetch(url,{method,cache:'no-store',headers:{'Content-Type':'application/json','X-Access-Code':store.get('ptk-code','')},body:body?JSON.stringify(body):undefined});
+  if(r.status===401){askCode();const e=new Error('auth');e.code='auth';throw e}
+  if(!r.ok){const e=new Error('http '+r.status);e.code='http';throw e}
+  return r.json();
+}
+function askCode(){$('codePanel').hidden=false;$('codeInput').focus()}
+$('codePanel').addEventListener('submit',async e=>{
+  e.preventDefault();store.set('ptk-code',$('codeInput').value.trim());
+  $('codeErr').hidden=true;
+  try{await api('GET','/api/log');$('codePanel').hidden=true;loadLog()}catch(err){if(err.code==='auth')$('codeErr').hidden=false}
+});
+const offlineMsg="Can't reach the server right now. Results are kept on this device and will sync automatically.";
+async function loadLog(){
+  try{
+    myData=await api('GET','/api/log');
+    setSync('on','Synced. This log is the same on every device.');
+    renderHistory();
+    const q=unsynced();for(const id in q)await pushSession(q[id]);
+  }catch(e){if(e.code!=='auth')setSync('warn',offlineMsg)}
+}
+async function pushSession(rec){
+  const q=unsynced();q[rec.id]=rec;store.set('ptk-unsynced',q);
+  pending=rec; if(writing)return; writing=true;
+  try{
+    while(pending){const r=pending;pending=null;myData=await api('PUT','/api/sessions/'+encodeURIComponent(r.id),r);
+      const q2=unsynced();if(q2[r.id]&&q2[r.id].n===r.n&&q2[r.id].done===r.done){delete q2[r.id];store.set('ptk-unsynced',q2)}}
+    setSync('on','Synced. This log is the same on every device.');renderHistory();
+  }catch(e){if(e.code!=='auth')setSync('warn',offlineMsg)}
+  finally{writing=false}
+}
+loadLog();
+setInterval(()=>{if(!$('setup').hidden&&!document.hidden)loadLog()},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('setup').hidden)loadLog()});
+
+/* ---------- session ---------- */
+let S=null, cur=null, phase='ask', tickT=null;
+const IDLE_MS=90000;
+
+function show(id){['setup','drill','summary'].forEach(x=>$(x).hidden=x!==id)}
+
+function start(){
+  const cats=CATS.filter(c=>$('cat-'+c.id).checked);
+  if(!cats.length){$('setupErr').hidden=false;return}
+  $('setupErr').hidden=true;
+  const goal=GOALS.find(g=>$('goal-'+g.id).checked)||GOALS[0];
+  store.set('ptk-prefs',{cats:cats.map(c=>c.id),goal:goal.id,v:2});
+  S={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:Date.now(),cats,goal,log:[],retry:[],active:0,last:performance.now(),lastInput:performance.now(),paused:false,recent:[]};
+  $('sGoal').textContent=goal.q?` / ${goal.q}`:'';
+  show('drill');next();
+  clearInterval(tickT);tickT=setInterval(tick,250);
+}
+
+function tick(){
+  if(!S)return;
+  const now=performance.now(), d=now-S.last; S.last=now;
+  const idle=now-S.lastInput>IDLE_MS;
+  const counting=!S.paused&&!document.hidden&&!idle;
+  if(counting){S.active+=d;if(cur)cur.ms+=d}
+  $('sTime').textContent=fmt(S.active);
+  $('sIdle').hidden=!(S.paused||idle);
+  $('sIdle').textContent=S.paused?'· paused':'· idle, type to resume';
+  if(S.goal.m&&S.active>=S.goal.m*60000&&phase!=='done')finish();
+}
+
+function nextItem(){
+  const n=S.log.length;
+  const due=S.retry.findIndex(r=>r.due<=n);
+  if(due>=0){const r=S.retry.splice(due,1)[0];return {...r.item,again:true}}
+  const draw=()=>{const c=pick(S.cats);return {...c.gen(),cat:c.name}};
+  for(let i=0;i<20;i++){const it=draw();if(!S.recent.includes(it.key))return it}
+  return draw();
+}
+
+function next(){
+  if(S.goal.q&&S.log.length>=S.goal.q)return finish();
+  cur={...nextItem(),ms:0};
+  S.recent.push(cur.key);if(S.recent.length>15)S.recent.shift();
+  phase='ask';
+  $('qTag').textContent=cur.tag+(cur.again?' · try again':'');
+  $('qText').textContent=cur.q;
+  $('qText').classList.toggle('long',cur.q.length>14);
+  const a=$('answer');a.value='';a.disabled=false;
+  a.setAttribute('inputmode',cur.text?'text':'decimal');
+  a.placeholder=cur.ph||(cur.text?(cur.tag==='Calendar'?'month name':'e.g. 3 pm'):'');
+  $('goBtn').textContent='Check';
+  $('fb').className='fb';$('fb').innerHTML='';
+  a.focus();
+}
+
+function submit(e){
+  e&&e.preventDefault();
+  S.lastInput=performance.now();
+  if(phase==='feedback'){next();return}
+  if(phase!=='ask')return;
+  const val=$('answer').value.trim();
+  if(!val){$('answer').focus();return}
+  const ok=cur.check(val);
+  phase='feedback';
+  S.log.push({tag:cur.tag,cat:cur.cat,q:cur.q,shown:cur.shown,given:val,ok,ms:cur.ms});
+  $('sCount').textContent=S.log.length;
+  $('sRight').textContent=S.log.filter(l=>l.ok).length;
+  pushSession(sessionRecord(false));
+  $('answer').disabled=true;
+  const fb=$('fb');
+  if(ok){
+    fb.className='fb ok';fb.textContent='Correct';
+    setTimeout(()=>{if(phase==='feedback'&&S&&cur&&S.log.length&&S.log[S.log.length-1].q===cur.q)next()},650);
+  }else{
+    fb.className='fb miss';
+    fb.innerHTML=`<span>${cur.q.replace(/\?$/,'')} = ${cur.shown}</span><span class="hint">You said ${escapeHtml(val)}. It'll come back in a bit.</span>`;
+    S.retry.push({item:cur,due:S.log.length+R(3,5)});
+    $('goBtn').textContent='Next';$('goBtn').focus();
+  }
+}
+function sessionRecord(done){
+  const L=S.log, by={};
+  L.forEach(l=>{const b=by[l.cat]||(by[l.cat]={n:0,c:0,ms:0});b.n++;b.c+=l.ok?1:0;b.ms+=Math.round(l.ms)});
+  return {id:S.id,t:S.t,n:L.length,c:L.filter(l=>l.ok).length,ms:Math.round(S.active),done,by,
+    missed:L.filter(l=>!l.ok).slice(-30).map(l=>`${l.q.replace(/\?$/,'')} = ${l.shown}`)};
+}
+addEventListener('pagehide',()=>{if(S&&phase!=='done'&&S.log.length)pushSession(sessionRecord(false))});
+
+function finish(){
+  if(!S)return;
+  phase='done';clearInterval(tickT);
+  const L=S.log, n=L.length, c=L.filter(l=>l.ok).length;
+  if(n){const h=store.get('ptk-history',[]);h.push({t:S.t,n,c,ms:Math.round(S.active)});store.set('ptk-history',h.slice(-200))}
+  pushSession(sessionRecord(true));
+  $('sumHead').innerHTML=n
+    ?`You answered <em>${n} question${n===1?'':'s'}</em> in <em>${words(S.active)}</em> of active time. ${c} correct (${Math.round(c/n*100)}%), averaging ${(S.active/1000/n).toFixed(1)} seconds each.`
+    :`No answers this time. Active time: ${words(S.active)}.`;
+  const by={};L.forEach(l=>{const b=by[l.cat]||(by[l.cat]={n:0,c:0,ms:0});b.n++;b.c+=l.ok;b.ms+=l.ms});
+  $('sumTable').innerHTML=n?`<table><thead><tr><th>Topic</th><th class="n">Answered</th><th class="n">Correct</th><th class="n">Avg sec</th></tr></thead><tbody>${
+    Object.entries(by).map(([k,b])=>`<tr><td>${k}</td><td class="n">${b.n}</td><td class="n">${b.c} (${Math.round(b.c/b.n*100)}%)</td><td class="n">${(b.ms/1000/b.n).toFixed(1)}</td></tr>`).join('')}</tbody></table>`:'';
+  const missed=L.filter(l=>!l.ok);
+  const slow=L.filter(l=>l.ok).sort((a,b)=>b.ms-a.ms).slice(0,5).filter(l=>l.ms>8000);
+  $('sumMissed').innerHTML=(missed.length?missed.map(l=>`<div><span>${l.q.replace(/\?$/,'')} = <b>${l.shown}</b></span><span>you said <s>${escapeHtml(l.given)}</s></span></div>`).join(''):'<p class="empty">No misses. Nice.</p>')
+    +(slow.length?`<p class="empty" style="margin-top:10px;font-family:var(--f-body)">Right but slow (over 8 sec): these aren't automatic yet.</p>`+slow.map(l=>`<div><span>${l.q.replace(/\?$/,'')} = <b>${l.shown}</b></span><span>${(l.ms/1000).toFixed(1)} sec</span></div>`).join(''):'');
+  show('summary');renderHistory();
+}
+
+$('startBtn').onclick=start;
+$('ansForm').addEventListener('submit',submit);
+document.addEventListener('keydown',e=>{
+  if(S)S.lastInput=performance.now();
+  if(e.key==='Enter'&&phase==='feedback'&&document.activeElement!==$('goBtn')){e.preventDefault();next()}
+});
+$('answer').addEventListener('input',()=>{if(S)S.lastInput=performance.now()});
+$('pauseBtn').onclick=()=>{S.paused=!S.paused;S.lastInput=performance.now();$('pauseBtn').textContent=S.paused?'Resume':'Pause';if(!S.paused)$('answer').focus()};
+$('endBtn').onclick=finish;
+$('againBtn').onclick=()=>{show('setup');start()};
+$('homeBtn').onclick=()=>{S=null;show('setup')};
+</script>
+</body>
+</html>

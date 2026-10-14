@@ -1,0 +1,13 @@
+{
+  "name": "products-to-know-practice",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Randomized math-fact and unit-conversion drills with a shared practice log",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
